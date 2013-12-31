@@ -100,10 +100,8 @@ handle_fix(#message{type = logon, sender = Sender, target = Target, body = M}, #
   Password == <<"TestPw">>,
 
   Grant == true orelse throw({stop, invalid_password, Fix}),
-  SendFix = swapTargetSender(Fix, Sender, Target),
-  io:format("Recv: ~p~n", [M]),
-    SendFix1 = send(#message{type = logon, body = [{heart_bt_int, 30}, {encrypt_method, 0}]}, SendFix),
-    send(#message{type = test_request, body = [{test_req_id, "AARON"}]}, SendFix1);
+    SendFix1 = send(#message{type = logon, body = [{heart_bt_int, 30}, {encrypt_method, 0}]}, Fix#fix{sender = Target, target = Sender});
+%    send(#message{type = test_request, body = [{test_req_id, "AARON"}]}, SendFix1);
 
 handle_fix(#message{type = logout}, #fix{} = Fix) ->
   throw({stop, normal, Fix});
@@ -131,9 +129,6 @@ handle_fix(Msg, Fix) ->
   Fix.
 
 terminate(_,_) -> ok.
-
-swapTargetSender(#fix{} = Fix, Sender, Target) ->
-    Fix#fix{sender = Target, target = Sender}.
 
 encode(#message{type = Type, seq = Seq, sender = Sender, target = Target, body = Body}) ->
   fix:pack(Type, Body, Seq, Sender, Target).
