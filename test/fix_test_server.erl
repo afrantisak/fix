@@ -100,8 +100,7 @@ handle_fix(#message{type = logon, sender = Sender, target = Target, body = M}, #
   Password == <<"TestPw">>,
 
   Grant == true orelse throw({stop, invalid_password, Fix}),
-    SendFix1 = send(#message{type = logon, body = [{heart_bt_int, 30}, {encrypt_method, 0}]}, Fix#fix{sender = Target, target = Sender});
-%    send(#message{type = test_request, body = [{test_req_id, "AARON"}]}, SendFix1);
+  send(#message{type = logon, body = [{heart_bt_int, 30}, {encrypt_method, 0}]}, Fix#fix{sender = Target, target = Sender});
 
 handle_fix(#message{type = logout}, #fix{} = Fix) ->
   throw({stop, normal, Fix});
@@ -120,9 +119,11 @@ handle_fix(#message{type = market_data_request, body = Msg}, Fix) ->
   end;
 
 handle_fix(#message{type = test_request, body = Msg}, Fix) ->
-    TestReqId = proplists:get_value(test_req_id, Msg),
-    SendFix = Fix,
-    send(#message{type = heartbeat, body = [{test_req_id, TestReqId}]}, SendFix);
+  TestReqId = proplists:get_value(test_req_id, Msg),
+  send(#message{type = heartbeat, body = [{test_req_id, TestReqId}]}, Fix);
+
+handle_fix(#message{type = heartbeat}, Fix) ->
+  Fix;
 
 handle_fix(Msg, Fix) ->
   ?debugFmt("fix ~240p", [Msg]),
@@ -134,8 +135,8 @@ encode(#message{type = Type, seq = Seq, sender = Sender, target = Target, body =
   fix:pack(Type, Body, Seq, Sender, Target).
 
 send(#message{} = Msg, #fix{server_seq = Seq, socket = Socket, sender = Sender, target = Target} = Server) ->
-    Encoded = encode(Msg#message{seq = Seq, sender = Sender, target = Target}),
-  gen_tcp:send(Socket, Encoded),
+  encode(Msg#message{seq = Seq, sender = Sender, target = Target}),
+  gen_tcp:send(Socket, encode(Msg#message{seq = Seq, sender = Sender, target = Target})),
   Server#fix{server_seq = Seq + 1}.
 
 
