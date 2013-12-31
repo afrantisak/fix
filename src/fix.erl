@@ -90,7 +90,7 @@ MessageType =/= undefined, is_list(Body), is_integer(SeqNum), Sender =/= undefin
   end,
   Body1 = encode(Header2 ++ Body),
   BodyLength = iolist_size(Body1),
-  Body2 = iolist_to_binary([encode([{begin_string, "FIX.4.4"}, {body_length, BodyLength}]), Body1]),
+  Body2 = iolist_to_binary([encode([{begin_string, "FIX.4.2"}, {body_length, BodyLength}]), Body1]),
   CheckSum = checksum(Body2),
   Body3 = [Body2, encode([{check_sum, CheckSum}])],
   % ?D({out,Header2, dump(Body3)}),
@@ -131,7 +131,7 @@ decode0(Bin) ->
       Else
   end.  
 
-decode_fields(<<"8=FIX.4.4",1,"9=", Bin/binary>> = FullBin) ->
+decode_fields(<<"8=FIX.4.2",1,"9=", Bin/binary>> = FullBin) ->
   case binary:split(Bin, <<1>>) of
     [BinLen, Rest1] ->
       BodyLength = list_to_integer(binary_to_list(BinLen)),

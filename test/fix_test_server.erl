@@ -100,7 +100,10 @@ handle_fix(#message{type = logon, sender = Sender, target = Target, body = M}, #
   Password == <<"TestPw">>,
 
   Grant == true orelse throw({stop, invalid_password, Fix}),
-  send(#message{type = logon}, Fix#fix{sender = Target, target = Sender});
+  SendFix = swapTargetSender(Fix, Sender, Target),
+  io:format("Recv: ~p~n", [M]),
+    SendFix1 = send(#message{type = logon, body = [{heart_bt_int, 30}, {encrypt_method, 0}]}, SendFix),
+    send(#message{type = test_request, body = [{test_req_id, "AARON"}]}, SendFix1);
 
 handle_fix(#message{type = logout}, #fix{} = Fix) ->
   throw({stop, normal, Fix});
@@ -118,20 +121,26 @@ handle_fix(#message{type = market_data_request, body = Msg}, Fix) ->
       send(#message{type = market_data_request_reject, body = [{md_req_id,MdReqId},{md_req_rej_reason,unknownsym},{text,<<"MDRequest failed">>}]}, Fix)
   end;
 
+handle_fix(#message{type = test_request, body = Msg}, Fix) ->
+    TestReqId = proplists:get_value(test_req_id, Msg),
+    SendFix = Fix,
+    send(#message{type = heartbeat, body = [{test_req_id, TestReqId}]}, SendFix);
+
 handle_fix(Msg, Fix) ->
   ?debugFmt("fix ~240p", [Msg]),
   Fix.
 
-
 terminate(_,_) -> ok.
 
+swapTargetSender(#fix{} = Fix, Sender, Target) ->
+    Fix#fix{sender = Target, target = Sender}.
 
 encode(#message{type = Type, seq = Seq, sender = Sender, target = Target, body = Body}) ->
   fix:pack(Type, Body, Seq, Sender, Target).
 
-
 send(#message{} = Msg, #fix{server_seq = Seq, socket = Socket, sender = Sender, target = Target} = Server) ->
-  gen_tcp:send(Socket, encode(Msg#message{seq = Seq, sender = Sender, target = Target})),
+    Encoded = encode(Msg#message{seq = Seq, sender = Sender, target = Target}),
+  gen_tcp:send(Socket, Encoded),
   Server#fix{server_seq = Seq + 1}.
 
 

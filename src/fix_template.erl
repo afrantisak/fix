@@ -76,7 +76,7 @@ config() ->
   end.
 
 parse() ->
-  {ok, Xml} = file:read_file(root() ++"/spec/FIX44.xml"),
+  {ok, Xml} = file:read_file(root() ++"/spec/FIX42.xml"),
   {ok, #parser{messages = Messages} = State, _} = erlsom:parse_sax(Xml, #parser{}, fun handler/2, []),
   Prepend = ["exchange", "sending_time"],
   Config = config(),
