@@ -15,8 +15,8 @@
 start_listener() ->
   application:start(ranch),
   Spec = ranch:child_spec(fix_listener, 10,
-    ranch_tcp, [{port, fix:get_value(fix_port)}],
-    fix_server, []
+    ranch_tcp, [{port, fix:get_value(fix_port)}]
+%    fix_server, []
   ),
   {ok, Pid} = supervisor:start_child(fix_sup, Spec),
   error_logger:info_msg("Starting FIX server on port ~p~n", [fix:get_value(fix_port)]),

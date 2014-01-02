@@ -89,18 +89,18 @@ start_worker(ListenerPid, Socket, Opts) ->
 %%% Internals
 
 %% Fix server (used for MD proxying)
-init([fix_server]) ->
-  {ok, {{simple_one_for_one, 5, 60}, [
-    {   undefined,                               % Id       = internal id
-      {fix_server,start_link,[]},             % StartFun = {M, F, A}
-            temporary,                               % Restart  = permanent | transient | temporary
-            2000,                                    % Shutdown = brutal_kill | int() >= 0 | infinity
-            worker,                                  % Type     = worker | supervisor
-            []                            % Modules  = [Module] | dynamic
-        }
-      ]
-    }
-  };
+%% init([fix_server]) ->
+%%   {ok, {{simple_one_for_one, 5, 60}, [
+%%     {   undefined,                               % Id       = internal id
+%%       {fix_server,start_link,[]},             % StartFun = {M, F, A}
+%%             temporary,                               % Restart  = permanent | transient | temporary
+%%             2000,                                    % Shutdown = brutal_kill | int() >= 0 | infinity
+%%             worker,                                  % Type     = worker | supervisor
+%%             []                            % Modules  = [Module] | dynamic
+%%         }
+%%       ]
+%%     }
+%%   };
 
 %% Execution connection.
 init([fix_exec_conn_sup]) ->
@@ -139,13 +139,13 @@ init([stocks]) ->
 
 init([]) ->
   Supervisors = [
-    {fix_server_sup,
-      {supervisor,start_link,[{local, fix_server_sup}, ?MODULE, [fix_server]]},
-      permanent,                               % Restart  = permanent | transient | temporary
-      infinity,                                % Shutdown = brutal_kill | int() >= 0 | infinity
-      supervisor,                              % Type     = worker | supervisor
-      []                                       % Modules  = [Module] | dynamic
-    },
+    %% {fix_server_sup,
+    %%   {supervisor,start_link,[{local, fix_server_sup}, ?MODULE, [fix_server]]},
+    %%   permanent,                               % Restart  = permanent | transient | temporary
+    %%   infinity,                                % Shutdown = brutal_kill | int() >= 0 | infinity
+    %%   supervisor,                              % Type     = worker | supervisor
+    %%   []                                       % Modules  = [Module] | dynamic
+    %% },
     {fix_connection_sup,
       {supervisor,start_link,[{local, fix_exec_conn_sup}, ?MODULE, [fix_exec_conn_sup]]},
       permanent,                               % Restart  = permanent | transient | temporary
